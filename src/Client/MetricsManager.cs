@@ -29,6 +29,7 @@ namespace LibratoSharp.Client
 
         private string _user;
         private string _apiToken;
+        private HttpClient _client;
 
         public MetricsManager(string user, string apiToken)
         {
@@ -38,6 +39,7 @@ namespace LibratoSharp.Client
             }
             this._user = user;
             this._apiToken = apiToken;
+            this._client = new HttpClient();
         }
 
         public async Task PostMeasurement(IMeasurement measurement)
@@ -211,13 +213,12 @@ namespace LibratoSharp.Client
         private async Task MakeJsonPost(string json, string urlPostfix, HttpMethod httpMethod)
         {
             string url = (urlPostfix == null) ? "https://metrics-api.librato.com/v1/metrics" : ("https://metrics-api.librato.com/v1/metrics" + urlPostfix);
-            var request = new HttpRequestMessage(httpMethod ?? HttpMethod.Post, url);
-            HttpClient client = new HttpClient();
+            var request = new HttpRequestMessage(httpMethod ?? HttpMethod.Post, url);            
             SetBasicAuthHeader(request, _user, _apiToken);
             request.Headers.Add("User-Agent", ".NET API Client");
 
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.SendAsync(request);
+            var response = await _client.SendAsync(request);
             response.EnsureSuccessStatusCode();
         }
 
